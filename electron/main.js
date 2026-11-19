@@ -14,6 +14,12 @@ app.commandLine.appendSwitch('disable-background-timer-throttling');
 app.commandLine.appendSwitch('disable-renderer-backgrounding');
 
 const ROOT = path.join(__dirname, '..', 'app');
+const fs = require('fs');
+// tryb diagnostyczny (tylko na serwerze GitHuba): zapisuje log i zrzut ekranu
+const DIAG = process.env.BC_DIAG ? (process.env.BC_DIAG_OUT || process.cwd()) : null;
+const dlog = (...a) => { if (DIAG) fs.appendFileSync(path.join(DIAG, 'diag.txt'), a.map(String).join(' ') + '\n'); };
+process.on('uncaughtException', (e) => { dlog('UNCAUGHT', e && e.stack); });
+dlog('start', process.versions.electron, __dirname, 'ROOT', ROOT, 'exists', fs.existsSync(path.join(ROOT, 'index.html')));
 let win = null, quitting = false;
 
 function createWindow() {
@@ -42,6 +48,20 @@ function createWindow() {
     win.webContents.executeJavaScript('window.__bc_save ? window.__bc_save() : 1', true).catch(() => {}).finally(() => { clearTimeout(t); done(); });
   });
   win.webContents.on('will-prevent-unload', (e) => e.preventDefault());
+  if (DIAG) {
+    win.webContents.on('console-message', (e, level, msg, line, src) => dlog('console', level, msg, src + ':' + line));
+    win.webContents.on('did-fail-load', (e, code, desc, url) => dlog('FAIL-LOAD', code, desc, url));
+    win.webContents.on('render-process-gone', (e, d) => dlog('GONE', JSON.stringify(d)));
+    win.webContents.on('did-finish-load', () => {
+      dlog('loaded');
+      setTimeout(() => win.webContents.executeJavaScript("window.__test_start ? (__test_start('diag', 4), 'started') : 'no __test_start'").then((r) => dlog('start world', r)).catch((e) => dlog('start err', e.message)), 3000);
+      setTimeout(async () => {
+        try { dlog('state', await win.webContents.executeJavaScript("JSON.stringify({ready: window.__game && __game.game.ready, chunks: window.__game && __game.world && __game.world.chunks.size})")); } catch (e) { dlog('state err', e.message); }
+        try { const img = await win.webContents.capturePage(); fs.writeFileSync(path.join(DIAG, 'diag.png'), img.toPNG()); dlog('screenshot ok'); } catch (e) { dlog('shot err', e.message); }
+        app.exit(0);
+      }, 30000);
+    });
+  }
   win.loadURL('app://blokcraft/index.html');
 }
 
@@ -51,8 +71,9 @@ app.whenReady().then(() => {
     let p = decodeURIComponent(u.pathname);
     if (!p || p === '/') p = '/index.html';
     const file = path.normalize(path.join(ROOT, p));
-    if (!file.startsWith(ROOT)) return new Response('Brak dostępu', { status: 403 });
-    return net.fetch(pathToFileURL(file).toString());
+    if (!file.startsWith(ROOT)) { dlog('403', file); return new Response('Brak dostępu', { status: 403 }); }
+    dlog('req', req.url, '->', file, fs.existsSync(file));
+    return net.fetch(pathToFileURL(file).toString()).then((r) => { dlog('res', req.url, r.status, r.headers.get('content-type')); return r; }).catch((e) => { dlog('ERR', req.url, e && e.message); throw e; });
   });
   createWindow();
 });
