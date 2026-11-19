@@ -36,7 +36,19 @@
     "win": {
       "target": [
         {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
           "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
           "arch": [
             "x64"
           ]
@@ -46,6 +58,17 @@
     },
     "portable": {
       "artifactName": "BlokCraft.exe"
-    }
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "BlokCraft",
+      "runAfterFinish": true,
+      "artifactName": "BlokCraft-Setup.exe",
+      "deleteAppDataOnUninstall": false
+    },
+    "artifactName": "BlokCraft-folder.${ext}"
   }
 }

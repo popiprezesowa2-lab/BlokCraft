@@ -4,11 +4,11 @@ Gra w stylu Minecrafta – świat z blokami, biomy, jaskinie, wioski, moby, Neth
 
 ## ⬇️ Pobierz
 
-**[Pobierz BlokCraft.exe](../../releases/latest/download/BlokCraft.exe)** (Windows, ok. 80 MB)
+**[Pobierz BlokCraft-Setup.exe](../../releases/latest/download/BlokCraft-Setup.exe)** (Windows, instalator – polecane)
 
-Albo wejdź w zakładkę **Releases** po prawej i pobierz `BlokCraft.exe`.
+Inne wersje: [BlokCraft.exe](../../releases/latest/download/BlokCraft.exe) (bez instalacji) · [BlokCraft-folder.zip](../../releases/latest/download/BlokCraft-folder.zip) (rozpakuj i uruchom `BlokCraft.exe`)
 
-1. Pobierz plik i kliknij go dwa razy – gra nie wymaga instalacji ani internetu.
+1. Pobierz instalator i kliknij go dwa razy – gra zainstaluje się sama, doda skrót na pulpicie i się uruchomi.
 2. Jeśli Windows pokaże „System Windows ochronił komputer” → **Więcej informacji** → **Uruchom mimo to**.
 3. Światy zapisują się same (w `%APPDATA%\BlokCraft`).
 
