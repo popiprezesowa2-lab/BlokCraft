@@ -1,0 +1,51 @@
+{
+  "name": "blokcraft",
+  "productName": "BlokCraft",
+  "version": "1.1.0",
+  "description": "BlokCraft - gra w stylu Minecrafta",
+  "author": "Nathxn",
+  "private": true,
+  "main": "electron/main.js",
+  "scripts": {
+    "build": "node build.mjs",
+    "start": "node build.mjs && electron .",
+    "dist": "node build.mjs && electron-builder --win portable --x64"
+  },
+  "devDependencies": {
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8",
+    "esbuild": "^0.24.2",
+    "javascript-obfuscator": "^4.1.1",
+    "three": "0.187.0"
+  },
+  "build": {
+    "appId": "pl.nathxn.blokcraft",
+    "productName": "BlokCraft",
+    "copyright": "autor: Nathxn",
+    "asar": true,
+    "files": [
+      "electron/**",
+      "app/**",
+      "build/icon.png",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png"
+    },
+    "portable": {
+      "artifactName": "BlokCraft.exe"
+    }
+  }
+}

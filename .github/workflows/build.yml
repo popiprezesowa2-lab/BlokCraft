@@ -1,0 +1,56 @@
+name: Zbuduj BlokCraft.exe
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Odszyfruj kod gry
+        shell: bash
+        env:
+          KEY: ${{ secrets.BLOKCRAFT_KEY }}
+        run: |
+          if [ -z "$KEY" ]; then echo "::error::Brak sekretu BLOKCRAFT_KEY (Settings -> Secrets and variables -> Actions)"; exit 1; fi
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in game.enc -out game.tar.gz -pass env:KEY
+          tar -xzf game.tar.gz
+          rm game.tar.gz
+
+      - name: Instalacja paczek
+        run: npm install --no-audit --no-fund
+
+      - name: Pakowanie i zaciemnianie kodu
+        run: node build.mjs
+
+      - name: Tworzenie BlokCraft.exe
+        run: npx electron-builder --win portable --x64 --publish never
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      - name: Wydanie do pobrania
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.1.${{ github.run_number }}
+          name: BlokCraft 1.1 (wersja ${{ github.run_number }})
+          make_latest: true
+          files: dist/BlokCraft.exe
+          body: |
+            **Pobierz plik `BlokCraft.exe` poniżej (Assets)**, kliknij dwa razy i graj – bez instalacji i bez internetu.
+
+            Jeśli Windows pokaże „System Windows ochronił komputer”, kliknij **Więcej informacji → Uruchom mimo to**.
+
+            Sterowanie: WASD, spacja, myszka, E – ekwipunek, T – czat (/help), F5 – widok, F11 – pełny ekran.
+
+            autor: Nathxn
